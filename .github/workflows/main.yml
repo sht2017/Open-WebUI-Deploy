@@ -21,7 +21,7 @@ jobs:
       - name: Compress Directory
         run: |
           echo "Compressing output directory..."
-          Compress-Archive -Path output -DestinationPath output.zip
+          Compress-Archive -Path ${{ github.workspace }} -DestinationPath build.zip
         shell: pwsh
 
       - name: Delete Old Pre-release
