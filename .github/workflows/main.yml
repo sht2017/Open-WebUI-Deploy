@@ -1,0 +1,48 @@
+name: Build and Pre-release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run Batch Script
+        run: |
+          echo "Running batch script..."
+          .\owebui_init.bat
+
+      - name: Compress Directory
+        run: |
+          echo "Compressing output directory..."
+          Compress-Archive -Path output -DestinationPath output.zip
+        shell: pwsh
+
+      - name: Delete Old Pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching existing pre-releases..."
+          $releases = gh release list --json tagName,isPrerelease | ConvertFrom-Json
+          foreach ($release in $releases) {
+            if ($release.isPrerelease -eq $true) {
+              echo "Deleting old pre-release: $($release.tagName)"
+              gh release delete $release.tagName --yes
+            }
+          }
+        shell: pwsh
+
+      - name: Create New Pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Creating new pre-release..."
+          $tag = "pre-release-${{ github.run_number }}"
+          gh release create $tag output.zip --prerelease --title "Automated Pre-release $tag" --notes "Latest pre-release from GitHub Actions."
+        shell: pwsh
