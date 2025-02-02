@@ -44,5 +44,5 @@ jobs:
         run: |
           echo "Creating new pre-release..."
           $tag = "pre-release-${{ github.run_number }}"
-          gh release create $tag output.zip --prerelease --title "Automated Pre-release $tag" --notes "Latest pre-release from GitHub Actions."
+          gh release create $tag build.zip --prerelease --title "Automated Pre-release $tag" --notes "Latest pre-release from GitHub Actions."
         shell: pwsh
